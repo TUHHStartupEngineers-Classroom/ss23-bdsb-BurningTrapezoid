@@ -1,7 +1,7 @@
 ---
 title: "My Lab Journal"
 subtitle: "Business Data Science Basics"
-author: "Joschka Schwarz"
+author: "Andreas Jessen"
 ---
 
 ![](assets/logo/TIE_logo.svg){width=80% fig-align="center"}
