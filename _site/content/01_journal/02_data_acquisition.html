@@ -259,73 +259,59 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section><section id="challenge-2---scrape-website" class="level1" data-number="2"><h1 data-number="2">
 <span class="header-section-number">2</span> Challenge 2 - Scrape Website</h1>
 <p>For the second challenge I scraped the name and the price of the bikes in the mtb category on the rosebikes.de website.</p>
-<div class="cell" data-hash="02_data_acquisition_cache/html/unnamed-chunk-2_94c0c3bc6aa91e466fa0d0fc53f52971">
+<div class="cell" data-hash="02_data_acquisition_cache/html/unnamed-chunk-2_f2f706f23ed7aeef7354a5ae5193e0c1">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># WEBSCRAPING ----</span></span>
 <span id="cb6-2"><a href="#cb6-2"></a></span>
 <span id="cb6-3"><a href="#cb6-3"></a><span class="co"># 1.0 LIBRARIES ----</span></span>
 <span id="cb6-4"><a href="#cb6-4"></a></span>
 <span id="cb6-5"><a href="#cb6-5"></a><span class="fu">library</span>(tidyverse) <span class="co"># Main Package - Loads dplyr, purrr, etc.</span></span>
-<span id="cb6-6"><a href="#cb6-6"></a><span class="fu">library</span>(rvest)     <span class="co"># HTML Hacking &amp; Web Scraping</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>#&gt; 
-#&gt; Attache Paket: 'rvest'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>#&gt; Das folgende Objekt ist maskiert 'package:readr':
-#&gt; 
-#&gt;     guess_encoding</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">library</span>(xopen)     <span class="co"># Quickly opening URLs</span></span>
-<span id="cb9-2"><a href="#cb9-2"></a><span class="fu">library</span>(jsonlite)  <span class="co"># converts JSON files to R objects</span></span>
-<span id="cb9-3"><a href="#cb9-3"></a><span class="fu">library</span>(glue)      <span class="co"># concatenate strings</span></span>
-<span id="cb9-4"><a href="#cb9-4"></a><span class="fu">library</span>(stringi)   <span class="co"># character string/text processing</span></span>
-<span id="cb9-5"><a href="#cb9-5"></a></span>
-<span id="cb9-6"><a href="#cb9-6"></a><span class="co"># 1.1 COLLECT PRODUCT FAMILIES ----</span></span>
-<span id="cb9-7"><a href="#cb9-7"></a></span>
-<span id="cb9-8"><a href="#cb9-8"></a>url_home          <span class="ot">&lt;-</span> <span class="st">"https://www.rosebikes.de/fahrr%C3%A4der/mtb"</span></span>
-<span id="cb9-9"><a href="#cb9-9"></a></span>
-<span id="cb9-10"><a href="#cb9-10"></a><span class="co"># Read in the HTML for the entire webpage</span></span>
-<span id="cb9-11"><a href="#cb9-11"></a>html_home         <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url_home)</span>
-<span id="cb9-12"><a href="#cb9-12"></a></span>
-<span id="cb9-13"><a href="#cb9-13"></a><span class="co"># Web scrape the bike names</span></span>
-<span id="cb9-14"><a href="#cb9-14"></a>bike_name_tbl <span class="ot">&lt;-</span> html_home <span class="sc">%&gt;%</span></span>
-<span id="cb9-15"><a href="#cb9-15"></a>  </span>
-<span id="cb9-16"><a href="#cb9-16"></a>  <span class="co"># Get the nodes for the families ...</span></span>
-<span id="cb9-17"><a href="#cb9-17"></a>  <span class="fu">html_nodes</span>(<span class="at">css =</span> <span class="st">".catalog-category-bikes__content"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-18"><a href="#cb9-18"></a>  <span class="co"># ...and extract the information of the id attribute</span></span>
-<span id="cb9-19"><a href="#cb9-19"></a>  </span>
-<span id="cb9-20"><a href="#cb9-20"></a>  <span class="fu">html_nodes</span>(<span class="at">css =</span> <span class="st">".basic-headline__title"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-21"><a href="#cb9-21"></a>  </span>
-<span id="cb9-22"><a href="#cb9-22"></a>  <span class="fu">html_text</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb9-23"><a href="#cb9-23"></a>  </span>
-<span id="cb9-24"><a href="#cb9-24"></a>  <span class="co"># Convert vector to tibble</span></span>
-<span id="cb9-25"><a href="#cb9-25"></a>  <span class="fu">enframe</span>(<span class="at">name =</span> <span class="st">"position"</span>, <span class="at">value =</span> <span class="st">"bike_name"</span>) <span class="co">#%&gt;%</span></span>
-<span id="cb9-26"><a href="#cb9-26"></a></span>
-<span id="cb9-27"><a href="#cb9-27"></a><span class="co"># Web scrape the bike price</span></span>
-<span id="cb9-28"><a href="#cb9-28"></a>bike_price_tbl <span class="ot">&lt;-</span> html_home <span class="sc">%&gt;%</span></span>
-<span id="cb9-29"><a href="#cb9-29"></a>  </span>
-<span id="cb9-30"><a href="#cb9-30"></a>  <span class="co"># Get the nodes for the families ...</span></span>
-<span id="cb9-31"><a href="#cb9-31"></a>  <span class="fu">html_nodes</span>(<span class="at">css =</span> <span class="st">".catalog-category-bikes__content"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-32"><a href="#cb9-32"></a>  <span class="co"># ...and extract the information of the id attribute</span></span>
-<span id="cb9-33"><a href="#cb9-33"></a>  </span>
-<span id="cb9-34"><a href="#cb9-34"></a>  <span class="fu">html_nodes</span>(<span class="at">css =</span> <span class="st">".catalog-category-bikes__price-title"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-35"><a href="#cb9-35"></a>  </span>
-<span id="cb9-36"><a href="#cb9-36"></a>  <span class="fu">html_text</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb9-37"><a href="#cb9-37"></a>  </span>
-<span id="cb9-38"><a href="#cb9-38"></a>  <span class="co"># Convert vector to tibble</span></span>
-<span id="cb9-39"><a href="#cb9-39"></a>  <span class="fu">enframe</span>(<span class="at">name =</span> <span class="st">"position"</span>, <span class="at">value =</span> <span class="st">"bike_price_text"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-40"><a href="#cb9-40"></a>  </span>
-<span id="cb9-41"><a href="#cb9-41"></a>  <span class="fu">mutate</span>(<span class="at">bike_price_text =</span> <span class="fu">gsub</span>(<span class="st">'</span><span class="sc">\n</span><span class="st">                                                ab '</span>, <span class="st">''</span>, bike_price_text)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-42"><a href="#cb9-42"></a>  </span>
-<span id="cb9-43"><a href="#cb9-43"></a>  <span class="fu">mutate</span>(<span class="at">bike_price_text =</span> <span class="fu">gsub</span>(<span class="st">'</span><span class="sc">\n</span><span class="st">                                            '</span>, <span class="st">''</span>, bike_price_text))</span>
-<span id="cb9-44"><a href="#cb9-44"></a></span>
-<span id="cb9-45"><a href="#cb9-45"></a>  </span>
-<span id="cb9-46"><a href="#cb9-46"></a></span>
-<span id="cb9-47"><a href="#cb9-47"></a>bike_tbl <span class="ot">&lt;-</span> <span class="fu">left_join</span>(bike_name_tbl, bike_price_tbl)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-6"><a href="#cb6-6"></a><span class="fu">library</span>(rvest)     <span class="co"># HTML Hacking &amp; Web Scraping</span></span>
+<span id="cb6-7"><a href="#cb6-7"></a><span class="fu">library</span>(xopen)     <span class="co"># Quickly opening URLs</span></span>
+<span id="cb6-8"><a href="#cb6-8"></a><span class="fu">library</span>(jsonlite)  <span class="co"># converts JSON files to R objects</span></span>
+<span id="cb6-9"><a href="#cb6-9"></a><span class="fu">library</span>(glue)      <span class="co"># concatenate strings</span></span>
+<span id="cb6-10"><a href="#cb6-10"></a><span class="fu">library</span>(stringi)   <span class="co"># character string/text processing</span></span>
+<span id="cb6-11"><a href="#cb6-11"></a></span>
+<span id="cb6-12"><a href="#cb6-12"></a><span class="co"># 1.1 COLLECT PRODUCT FAMILIES ----</span></span>
+<span id="cb6-13"><a href="#cb6-13"></a></span>
+<span id="cb6-14"><a href="#cb6-14"></a>url_home          <span class="ot">&lt;-</span> <span class="st">"https://www.rosebikes.de/fahrr%C3%A4der/mtb"</span></span>
+<span id="cb6-15"><a href="#cb6-15"></a></span>
+<span id="cb6-16"><a href="#cb6-16"></a><span class="co"># Read in the HTML for the entire webpage</span></span>
+<span id="cb6-17"><a href="#cb6-17"></a>html_home         <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url_home)</span>
+<span id="cb6-18"><a href="#cb6-18"></a></span>
+<span id="cb6-19"><a href="#cb6-19"></a><span class="co"># Web scrape the bike names</span></span>
+<span id="cb6-20"><a href="#cb6-20"></a>bike_name_tbl <span class="ot">&lt;-</span> html_home <span class="sc">%&gt;%</span></span>
+<span id="cb6-21"><a href="#cb6-21"></a>  </span>
+<span id="cb6-22"><a href="#cb6-22"></a>  <span class="co"># Get the nodes</span></span>
+<span id="cb6-23"><a href="#cb6-23"></a>  <span class="fu">html_nodes</span>(<span class="at">css =</span> <span class="st">".catalog-category-bikes__content"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-24"><a href="#cb6-24"></a>  </span>
+<span id="cb6-25"><a href="#cb6-25"></a>  <span class="fu">html_nodes</span>(<span class="at">css =</span> <span class="st">".basic-headline__title"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-26"><a href="#cb6-26"></a>  </span>
+<span id="cb6-27"><a href="#cb6-27"></a>  <span class="fu">html_text</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb6-28"><a href="#cb6-28"></a>  </span>
+<span id="cb6-29"><a href="#cb6-29"></a>  <span class="co"># Convert vector to tibble</span></span>
+<span id="cb6-30"><a href="#cb6-30"></a>  <span class="fu">enframe</span>(<span class="at">name =</span> <span class="st">"position"</span>, <span class="at">value =</span> <span class="st">"bike_name"</span>) <span class="co">#%&gt;%</span></span>
+<span id="cb6-31"><a href="#cb6-31"></a></span>
+<span id="cb6-32"><a href="#cb6-32"></a><span class="co"># Web scrape the bike price</span></span>
+<span id="cb6-33"><a href="#cb6-33"></a>bike_price_tbl <span class="ot">&lt;-</span> html_home <span class="sc">%&gt;%</span></span>
+<span id="cb6-34"><a href="#cb6-34"></a>  </span>
+<span id="cb6-35"><a href="#cb6-35"></a>  <span class="co"># Get the nodes</span></span>
+<span id="cb6-36"><a href="#cb6-36"></a>  <span class="fu">html_nodes</span>(<span class="at">css =</span> <span class="st">".catalog-category-bikes__content"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-37"><a href="#cb6-37"></a>  <span class="fu">html_nodes</span>(<span class="at">css =</span> <span class="st">".catalog-category-bikes__price-title"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-38"><a href="#cb6-38"></a>  <span class="fu">html_text</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb6-39"><a href="#cb6-39"></a>  </span>
+<span id="cb6-40"><a href="#cb6-40"></a>  <span class="co"># Convert vector to tibble</span></span>
+<span id="cb6-41"><a href="#cb6-41"></a>  <span class="fu">enframe</span>(<span class="at">name =</span> <span class="st">"position"</span>, <span class="at">value =</span> <span class="st">"bike_price_text"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-42"><a href="#cb6-42"></a>  </span>
+<span id="cb6-43"><a href="#cb6-43"></a>  <span class="fu">mutate</span>(<span class="at">bike_price_text =</span> <span class="fu">gsub</span>(<span class="st">'</span><span class="sc">\n</span><span class="st">                                                ab '</span>, <span class="st">''</span>, bike_price_text)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-44"><a href="#cb6-44"></a>  <span class="fu">mutate</span>(<span class="at">bike_price_text =</span> <span class="fu">gsub</span>(<span class="st">'</span><span class="sc">\n</span><span class="st">                                            '</span>, <span class="st">''</span>, bike_price_text))</span>
+<span id="cb6-45"><a href="#cb6-45"></a></span>
+<span id="cb6-46"><a href="#cb6-46"></a>  </span>
+<span id="cb6-47"><a href="#cb6-47"></a></span>
+<span id="cb6-48"><a href="#cb6-48"></a>bike_tbl <span class="ot">&lt;-</span> <span class="fu">left_join</span>(bike_name_tbl, bike_price_tbl)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>#&gt; Joining with `by = join_by(position)`</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>bike_tbl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>bike_tbl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 
 <div data-pagedtable="false">

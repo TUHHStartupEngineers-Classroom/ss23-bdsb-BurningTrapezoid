@@ -1,8 +1,92 @@
 ---
 title: "Data Wrangling"
-author: "Joschka Schwarz"
+author: "Andreas Jessen"
 ---
+Below are my results for the three Questions of the data wrangling challenge.
 
-::: callout-note
-You can delete everything in here and start fresh.
-:::
+```{r}
+# Tidyverse
+library(tidyverse)
+library(vroom)
+
+# Data Table
+library(data.table)
+
+col_types <- list(
+  id = col_character(),
+  date = col_date("%Y-%m-%d"),
+  num_claims = col_double()
+)
+
+patent_tbl <- vroom(
+  file       = "/home/andi/Dokumente/Uni/Business Data Science Basics/ds_data/Patent_data_reduced/patent.tsv", 
+  delim      = "\t", 
+  col_types  = col_types,
+  na         = c("", "NA", "NULL")
+)
+
+setDT(patent_tbl)
+
+patent_assignee_tbl <- vroom(
+  file       = "/home/andi/Dokumente/Uni/Business Data Science Basics/ds_data/Patent_data_reduced/patent_assignee.tsv", 
+  delim      = "\t", 
+  col_types  = list(
+    patent_id = col_character(),
+    assignee_id = col_character()
+  ),
+  na         = c("", "NA", "NULL")
+) 
+setDT(patent_assignee_tbl)
+
+assignee_tbl <- vroom(
+  file       = "/home/andi/Dokumente/Uni/Business Data Science Basics/ds_data/Patent_data_reduced/assignee.tsv", 
+  delim      = "\t", 
+  col_types  = list(
+    id = col_character(),
+    type = col_double(),
+    organization = col_character()
+  ),
+  na         = c("", "NA", "NULL")
+)
+setDT(assignee_tbl)
+
+uspc_tbl <- vroom(
+  file       = "/home/andi/Dokumente/Uni/Business Data Science Basics/ds_data/Patent_data_reduced/uspc.tsv", 
+  delim      = "\t", 
+  col_types  = list(
+    patent_id = col_character(),
+    mainclass_id = col_character(),
+    sequence = col_double()
+  ),
+  na         = c("", "NA", "NULL")
+)
+setDT(uspc_tbl)
+
+# Question 1 ----
+
+q1_tbl <- merge(patent_assignee_tbl, assignee_tbl, by.x='assignee_id', by.y='id')
+
+setkey(q1_tbl, 'organization')
+
+top10 <- q1_tbl[!is.na(organization), .N, by = organization][order(-N)][1:10]
+top10
+
+# Question 2 ----
+
+q2_tbl <- merge(patent_tbl, q1_tbl, by.x = "id", by.y='patent_id')
+
+setkey(q2_tbl, 'organization')
+
+q2_tbl[!is.na(organization)&lubridate::month(date) == "8" & lubridate::year(date) == "2014", .N, by = organization][order(-N)][1:10]
+
+# Question 3 ----
+
+q3_tbl <- merge(uspc_tbl, q1_tbl)
+
+top_organizations <- top10$organization
+
+setkey(q3_tbl, 'organization')
+
+q3_tbl[organization %in% top_organizations, .N, mainclass_id][order(-N)][1:5]
+
+```
