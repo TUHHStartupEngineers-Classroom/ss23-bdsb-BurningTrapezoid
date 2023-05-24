@@ -1,8 +1,86 @@
 ---
 title: "Data Acquisition"
-author: "Joschka Schwarz"
+author: "Andreas Jessen"
 ---
 
-::: callout-note
-You can delete everything in here and start fresh.
-:::
+# Challenge 1 - Get Data via API
+
+For the first challenge I got weather forecast data for Killer, Baden-Württemberg from the DWD.
+
+```{r}
+library(tidyverse)
+library(httr)
+library(jsonlite)
+
+resp <- GET('https://dwd.api.proxy.bund.dev/v30/stationOverviewExtended?stationIds=10865')
+
+forecast_list <- resp %>% 
+  .$content %>% 
+  rawToChar() %>% 
+  fromJSON()
+
+forecast_tbl <- forecast_list[["10865"]][["days"]]
+
+forecast_tbl
+```
+
+# Challenge 2 - Scrape Website
+
+For the second challenge I scraped the name and the price of the bikes in the mtb category on the rosebikes.de website.
+
+```{r}
+# WEBSCRAPING ----
+
+# 1.0 LIBRARIES ----
+
+library(tidyverse) # Main Package - Loads dplyr, purrr, etc.
+library(rvest)     # HTML Hacking & Web Scraping
+library(xopen)     # Quickly opening URLs
+library(jsonlite)  # converts JSON files to R objects
+library(glue)      # concatenate strings
+library(stringi)   # character string/text processing
+
+# 1.1 COLLECT PRODUCT FAMILIES ----
+
+url_home          <- "https://www.rosebikes.de/fahrr%C3%A4der/mtb"
+
+# Read in the HTML for the entire webpage
+html_home         <- read_html(url_home)
+
+# Web scrape the bike names
+bike_name_tbl <- html_home %>%
+  
+  # Get the nodes for the families ...
+  html_nodes(css = ".catalog-category-bikes__content") %>%
+  # ...and extract the information of the id attribute
+  
+  html_nodes(css = ".basic-headline__title") %>%
+  
+  html_text() %>%
+  
+  # Convert vector to tibble
+  enframe(name = "position", value = "bike_name") #%>%
+
+# Web scrape the bike price
+bike_price_tbl <- html_home %>%
+  
+  # Get the nodes for the families ...
+  html_nodes(css = ".catalog-category-bikes__content") %>%
+  # ...and extract the information of the id attribute
+  
+  html_nodes(css = ".catalog-category-bikes__price-title") %>%
+  
+  html_text() %>%
+  
+  # Convert vector to tibble
+  enframe(name = "position", value = "bike_price_text") %>%
+  
+  mutate(bike_price_text = gsub('\n                                                ab ', '', bike_price_text)) %>%
+  
+  mutate(bike_price_text = gsub('\n                                            ', '', bike_price_text))
+
+  
+
+bike_tbl <- left_join(bike_name_tbl, bike_price_tbl)
+bike_tbl
+```
