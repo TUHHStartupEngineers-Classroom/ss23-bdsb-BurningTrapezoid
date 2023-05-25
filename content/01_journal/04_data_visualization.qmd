@@ -1,8 +1,80 @@
 ---
 title: "Data Visualization"
-author: "Joschka Schwarz"
+author: "Andreas Jessen"
 ---
+# Callenge 1: 
 
-::: callout-note
-You can delete everything in here and start fresh.
-:::
+```{r}
+library(tidyverse)
+covid_data_tbl <- read_csv(
+  "https://covid.ourworldindata.org/data/owid-covid-data.csv")
+
+c1_tbl <- select(covid_data_tbl, location, date, total_cases) %>%
+  filter((location %in% c("Germany", "United Kingdom", "France", "Spain", 
+                         "United States"))&!is.na(total_cases))
+
+
+
+c1_tbl %>%
+  ggplot(aes(date, total_cases, color = location)) +
+  geom_line(size = 1) +
+  geom_label(label =  scales::dollar(filter(c1_tbl, date == "2023-05-24")$total_cases, 
+                                     scale  = 1e-6, 
+                                     prefix = "",
+                                     suffix = "M"),
+             data = c1_tbl %>%
+               filter(date == "2023-05-24"),
+             color='black') +
+  
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Covid-19 confirmed cases worldwide",
+    subtitle = "as of 2023-05-24",
+    x = "",
+    y = "Cumulative Cases"
+  ) +
+  scale_x_date(date_breaks = "1 month",
+               date_labels = "%B %Y")+
+  scale_y_continuous(labels = scales::dollar_format(scale = 1e-6, 
+                                                    prefix = "",
+                                                    suffix = "M"))
+```
+
+# Challenge 2: 
+
+```{r}
+world <- map_data("world") 
+
+
+c2_tbl <- select(covid_data_tbl, location, date, total_deaths_per_million) %>%
+  filter(date == "2023-05-24"&!is.na(total_deaths_per_million)) %>% 
+  mutate(location = case_when(
+    
+    location == "United Kingdom" ~ "UK",
+    location == "United States" ~ "USA",
+    location == "Democratic Republic of Congo" ~ "Democratic Republic of the Congo",
+    TRUE ~ location
+    
+  )) %>%
+  distinct() %>%
+  mutate(total_deaths_per_million = total_deaths_per_million/10000)
+
+
+  ggplot() +
+  geom_map(data = world, map = world, aes(x = long, y = lat, group = group, map_id=region)) +
+  geom_map(data = c2_tbl, map=world,
+           aes(fill=total_deaths_per_million, map_id=location)) +
+    
+  scale_y_continuous(breaks=c()) +
+  scale_x_continuous(breaks=c()) +
+  scale_fill_continuous(low="red", high="black", guide="colorbar") +
+  labs(fill="Mortality rate in percent",
+       title="Confirmed COVID-19 deaths worldwide", 
+       subtitle = "Around 6.2 Million confirmed COVID-19 deaths worldwide",
+       caption = "Date 05/24/2023",
+       x="", 
+       y="") +
+  
+  theme_minimal()
+```
